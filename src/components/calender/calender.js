@@ -143,7 +143,7 @@ export default function SuperMarketCalender() {
 
     const refs = dateObjArray.reduce((acc, value) => {
       acc[value.getDay()] = React.createRef();
-      console.log('Acc', acc);
+      // console.log('Acc', acc);
       return acc;
     }, {});
 
@@ -205,7 +205,7 @@ export default function SuperMarketCalender() {
         loadWeekDataForSelectedDate(newDate);
       }
     }
-console.log('refs', refs);
+// console.log('refs', refs);
 console.log('<----------------------------------------------------->');
 
     return (
@@ -219,13 +219,17 @@ console.log('<----------------------------------------------------->');
                     if( isToday(dateObj) ){
                         dayLabel = 'Today';
                     }
+                    console.log('first', dateObj.getDay());
+                    console.log('first', new Date().getDay());
+                    console.log('------------------------------>');
                     if(dateObj.getDay() === new Date().getDay() + 1) {
                         color = '#3f51b5';
                         //border = '1px solid #3f51b5';
                         hrLine = true;
-                    } else if((new Date().getDay() === 6) && (dateObj.getDay() === 6)) {
+                    } else if((new Date().getDay() === 6) && (dateObj.getDay() === 0)) {
                         color = '#3f51b5';
-                        border = '1px solid #3f51b5';
+                        //border = '1px solid #3f51b5';
+                        hrLine = true;
                     }
                     
                     return <React.Fragment key={index}>
