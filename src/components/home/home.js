@@ -22,6 +22,7 @@ import PersonOutlineOutlinedIcon from '@material-ui/icons/PersonOutlineOutlined'
 import AddIcon from '@material-ui/icons/Add';
 import json2mq from 'json2mq';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
+import * as categoriesData from '../common/data'
 
 const drawerWidth = 240;
 
@@ -202,7 +203,7 @@ function Menu(props) {
         <div className={classes.toolbar} />
         <div>
             <Header />
-            <Categories />
+            <Categories categories={categoriesData.categories}/>
         </div>
       </main>
     </div>

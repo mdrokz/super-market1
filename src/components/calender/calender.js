@@ -205,8 +205,6 @@ export default function SuperMarketCalender() {
         loadWeekDataForSelectedDate(newDate);
       }
     }
-// console.log('refs', refs);
-console.log('<----------------------------------------------------->');
 
     return (
         <div style={{textAlign:'center'}}>
@@ -219,9 +217,7 @@ console.log('<----------------------------------------------------->');
                     if( isToday(dateObj) ){
                         dayLabel = 'Today';
                     }
-                    console.log('first', dateObj.getDay());
-                    console.log('first', new Date().getDay());
-                    console.log('------------------------------>');
+                    
                     if(dateObj.getDay() === new Date().getDay() + 1) {
                         color = '#3f51b5';
                         //border = '1px solid #3f51b5';

@@ -4,6 +4,7 @@ import Home from './components/home/home';
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import CategoriesHome from './components/categories/categoriesHome';
 import CategoryDetails from './components/categories/categoryDetails';
+import Cart from './components/cart/cart';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route exact path="/" component = {Home}/>
           <Route exact path="/categories" component={CategoriesHome} />
           <Route exact path="/categoryDetails" component={CategoryDetails} />
+          <Route exact path="/cart" component={Cart} />
         </Switch>
       </Router>
     </div>

@@ -56,7 +56,7 @@ export default function Header() {
         <div>
           <div className={classes.searchBox}>
             <div><h3>What can we get you?</h3></div>
-            <Paper component="form" className={classes.root}>
+            <Paper component="form" className={classes.root}  onClick={routeChange}>
                 <IconButton type="submit" className={classes.iconButton} aria-label="search">
                     <SearchIcon />
                 </IconButton>

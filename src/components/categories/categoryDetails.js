@@ -21,15 +21,7 @@ import AccordionDetails from '@material-ui/core/AccordionDetails';
 import Snackbar from '@material-ui/core/Snackbar';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import Divider from '@material-ui/core/Divider';
-import suggestions_popular_picks from '../../media/suggestions_popular_picks.jpg';
-import suggestions_raw_pressery from '../../media/suggestions_raw_pressery.jpg';
-import suggestions_amul from '../../media/suggestions_amul.jpg';
-import suggestions_chitale from '../../media/suggestions_chitale.jpg';
-import suggestions_gokul from '../../media/suggestions_gokul.jpg';
-import suggestions_britania from '../../media/suggestions_britania.jpg';
-import category_milk_full_cream_amul_gold_500ml from '../../media/category_milk_full_cream_amul_gold_500ml.jpg';
-import category_milk_full_cream_amul_gold_1L from '../../media/category_milk_full_cream_amul_gold_1L.jpg';
-import category_milk_full_cream_gokul_500ml from '../../media/category_milk_full_cream_gokul_500ml.jpg';
+import * as categoriesData from '../common/data'
 
 const useStyles = makeStyles((theme) => ({
     appBar: {
@@ -85,10 +77,21 @@ export default function CategoryDetails(props) {
         setState(false);
     }
 
+    const gotToCart = (cartItems) => {
+        setState(false);
+        let path = '/cart';
+        history.push(path, cartItems);
+    }
+
     const [totalCartItems, updateCartItems] = React.useState(0);
+    const [totalCartItemsArr, updateCartItemsArr] = React.useState([]);
+    const [totalCartItemsPrice, updateCartItemsPrice] = React.useState(0);
+    const [item1Count, updateItem1Count] = React.useState(0);
+    const [item2Count, updateItem2Count] = React.useState(0);
+    const [item3Count, updateItem3Count] = React.useState(0);
     
-    const handleAdd = () => {
-        updateCartItems(totalCartItems => totalCartItems + 1);
+    const handleAdd = (subCategoryId, price) => {
+        incrementCartItem(subCategoryId, price);
         if(totalCartItems > 0){
             setState(true);
         }
@@ -97,29 +100,102 @@ export default function CategoryDetails(props) {
     React.useEffect( () => {
         if (totalCartItems > 0) {
             setState(true);
+        } else {
+            setState(false);
         }
     }, [totalCartItems]);
 
-    const incrementCartItem = () => {
+    const incrementCartItem = (subCategoryId, price) => {       
+        let flag = false;
+        let index = 0;
+        for(let i = 0; i < totalCartItemsArr.length; i++){
+            if(totalCartItemsArr[i].subCategoryId === subCategoryId) {
+                flag = true;
+                index = i;
+                break;
+            }
+        }
+
+        if(!flag){
+            const obj = {
+                subCategoryId: subCategoryId,
+                itemCount:1,
+                totalPrice:price
+            };
+            totalCartItemsArr.push(obj);
+        } else {
+            totalCartItemsArr[index].itemCount ++;
+            totalCartItemsArr[index].totalPrice = parseFloat(totalCartItemsArr[index].totalPrice) + parseFloat(price);
+        }
+        updateCartItemsArr(totalCartItemsArr);
+
+        if(subCategoryId === 1) {
+            updateItem1Count(item1Count => item1Count + 1);
+        } else if(subCategoryId === 2) {
+            updateItem2Count(item2Count => item2Count + 1);
+        } else if(subCategoryId === 3) {
+            updateItem3Count(item3Count => item3Count + 1);
+        }
+
         updateCartItems(totalCartItems => totalCartItems + 1);
+        updateCartItemsPrice(totalCartItemsPrice => parseFloat(totalCartItemsPrice) + parseFloat(price));
     }
 
-    const decrementCartItem = () => {
+    const decrementCartItem = (subCategoryId, price) => {
+        for(let i = 0; i < totalCartItemsArr.length; i++){
+            if(totalCartItemsArr[i].subCategoryId === subCategoryId){
+                if(totalCartItemsArr[i].itemCount > 1){
+                    totalCartItemsArr[i].itemCount --;
+                    totalCartItemsArr[i].totalPrice = parseFloat(totalCartItemsArr[i].totalPrice) - parseFloat(price);
+                    break;
+                } else {
+                    totalCartItemsArr.splice(i, 1);
+                    break;
+                }
+            }
+        }
+        
+        updateCartItemsArr(totalCartItemsArr);
+    
+        if(subCategoryId === 1){
+            updateItem1Count(item1Count => item1Count - 1);
+        } else if(subCategoryId === 2){
+            updateItem2Count(item2Count => item2Count - 1);
+        } else if(subCategoryId === 3){
+            updateItem3Count(item3Count => item3Count - 1);
+        }
+
         updateCartItems(totalCartItems => totalCartItems - 1);
+        updateCartItemsPrice(totalCartItemsPrice => parseFloat(totalCartItemsPrice) - parseFloat(price));
     }
 
-    console.log('Cart Items', totalCartItems);
+    const routeChange = () =>{ 
+        let path = '/categories';
+        history.push(path);
+    }
 
     const snackBarContent = (
         <div style={{display:'flex', justifyContent:'center', alignItems:'center'}}>
             <div><LocalMallIcon /></div>
             <Divider className={classes.divider} orientation="vertical" />
             <div>
-                <div>1 item</div>
-                <div>&#8377; 29.00</div>
+                <div>{totalCartItemsArr.length} item</div>
+                <div>&#8377; {totalCartItemsPrice}</div>
             </div>
         </div>
-      );
+    );
+
+    const checkItemCount = (subCategoryId) => {
+        if(subCategoryId === 1){
+            return item1Count;
+        } else if(subCategoryId === 2){
+            return item2Count;
+        } else if(subCategoryId === 3){
+            return item3Count;
+        } else {
+            return 0;
+        }
+    }
 
     return (
         <div>
@@ -128,7 +204,7 @@ export default function CategoryDetails(props) {
                     <IconButton edge="start" color="inherit" onClick={backToCategories} aria-label="close">
                         <ArrowBackIosIcon style={{ color: grey[800] }}/>
                     </IconButton>
-                    <div style={{width:'100%', backgroundColor:'#ffffff'}}>
+                    <div style={{width:'100%', backgroundColor:'#ffffff'}} onClick={routeChange}>
                         <IconButton type="submit" className={classes.iconButton} aria-label="search">
                             <SearchIcon />
                         </IconButton>
@@ -152,170 +228,89 @@ export default function CategoryDetails(props) {
                     <div>
                         <div style={{color: 'grey', fontSize: '16px', marginTop: '16px'}}>Suggestions</div>
                         <div style={{display: 'flex', overflow:'auto'}}>
-                            <div>
-                                <div><img className={classes.suggestionsImage} src={suggestions_popular_picks} alt='Popular Picks'/></div>
-                                <div className={classes.suggestionsText}>Popular Picks</div>
-                            </div>
-                            <div>
-                                <div><img className={classes.suggestionsImage} src={suggestions_raw_pressery} alt='Raw Pressery'/></div>
-                                <div className={classes.suggestionsText}>Raw Pressery</div>
-                            </div>
-                            <div>
-                                <div><img className={classes.suggestionsImage} src={suggestions_amul} alt='Amul'/></div>
-                                <div className={classes.suggestionsText}>Amul</div>
-                            </div>
-                            <div>
-                                <div><img className={classes.suggestionsImage} src={suggestions_chitale} alt='Chitale'/></div>
-                                <div className={classes.suggestionsText}>Chitale</div>
-                            </div>
-                            <div>
-                                <div><img className={classes.suggestionsImage} src={suggestions_gokul} alt='Gokul'/></div>
-                                <div className={classes.suggestionsText}>Gokul</div>
-                            </div>
-                            <div>
-                                <div><img className={classes.suggestionsImage} src={suggestions_britania} alt='Britania'/></div>
-                                <div className={classes.suggestionsText}>Britania</div>
-                            </div>
+                            {categoriesData.suggestions.map((suggestion, index) => {
+                                 return <div key={index}>
+                                            <div><img className={classes.suggestionsImage} src={require(`../../media/${suggestion.suggestionImage}`)} alt={suggestion.suggestion}/></div>
+                                            <div className={classes.suggestionsText}>{suggestion.suggestion}</div>
+                                        </div>
+                            })}  
                         </div>
                     </div>
                 </div>
                 <div style={{paddingTop: '20px'}}>
-                    <Accordion>
-                        <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls="panel1a-content"
-                        id="panel1a-header"
-                        >
-                            <div className={classes.heading}>
-                                <div>Full Cream Milk</div>
-                                <div style={{color:'grey', fontSize: '11px'}}>3 items</div>
-                            </div>
-                        </AccordionSummary>
-                        <AccordionDetails style={{flexDirection:'column'}}>
-                            <div style={{display: 'flex', marginBottom: '20px', justifyContent:'space-between'}}>
-                                <div>
-                                    <img style={{width:'65px', height: '65px'}}src={category_milk_full_cream_amul_gold_500ml} alt='Amul Gold Milk 500 ml'/>
-                                </div>
-                                <div style={{marginLeft: '10px', marginRight: '10px'}}>
-                                    <div style={{fontSize: '12px'}}>Amul-Gold Milk (500 ml)</div>
-                                    <div style={{fontSize: '11px', color:'grey', marginTop: '5px', marginBottom: '5px'}}>1 Pkt</div>
-                                    <div style={{fontSize: '12px'}}>&#8377; 29.00</div>
-                                </div>
-                                <div style={{textAlign:'right'}}>
-                                    {totalCartItems > 0 ? (
-                                        <div style={{marginBottom:'5px', float:'right',border:'1px solid', borderRadius:'25px',color:'#00c4b4'}}>
-                                            <div style={{display:'flex', paddingTop:'2px'}}>
-                                                <div style={{padding: '2px 5px 2px 5px'}}><RemoveIcon style={{fontSize:'15px'}} onClick={decrementCartItem}/></div>
-                                                <div style={{fontSize:'12px',padding: '2px 5px 2px 5px', color:'#000'}}>{totalCartItems}</div>
-                                                <div style={{padding: '2px 5px 2px 5px'}}><AddIcon style={{fontSize:'15px'}} onClick={incrementCartItem}/></div>
-                                            </div>
+                    {categoriesData.category1_subCategories.map((SubCategory, index) => {
+                        return <Accordion key={index}>
+                                    <AccordionSummary
+                                    expandIcon={<ExpandMoreIcon />}
+                                    aria-controls="panel1a-content"
+                                    id="panel1a-header"
+                                    >
+                                        <div className={classes.heading}>
+                                            <div>{SubCategory.subCategory}</div>
+                                            <div style={{color:'grey', fontSize: '11px'}}>{SubCategory.subCategoryItems.length} items</div>
                                         </div>
-                                    ) : (
-                                        <div style={{marginBottom:'5px'}}>
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            className={classes.addButton}
-                                            startIcon={<AddIcon fontSize="small"/>}
-                                            onClick={handleAdd}
-                                        >
-                                            ADD
-                                        </Button>
-                                        </div>
-                                    )}
-                                    <div style={{marginTop:'5px'}}>
-                                        <Button
-                                            variant="outlined"
-                                            color="primary"
-                                            className={classes.subscribeButton}
-                                            startIcon={<RepeatIcon style={{fontSize:'12px'}}/>}
-                                        >
-                                            SUBSCRIBE
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div style={{display: 'flex', marginBottom: '20px', justifyContent:'space-between'}}>
-                                <div>
-                                    <img style={{width:'65px', height: '65px'}}src={category_milk_full_cream_amul_gold_1L} alt='Amul Gold Milk 1 L'/>
-                                </div>
-                                <div style={{marginLeft: '10px', marginRight: '10px'}}>
-                                    <div style={{fontSize: '12px'}}>Amul-Gold Milk (1 L)</div>
-                                    <div style={{fontSize: '11px', color:'grey', marginTop: '5px', marginBottom: '5px'}}>1 Pkt</div>
-                                    <div style={{fontSize: '12px'}}>&#8377; 57.00</div>
-                                </div>
-                                <div style={{textAlign:'right'}}>
-                                    <div style={{marginBottom:'5px'}}>
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            className={classes.addButton}
-                                            startIcon={<AddIcon fontSize="small"/>}
-                                            onClick={() => setState(true)}
-                                        >
-                                            ADD
-                                        </Button>
-                                    </div>
-                                    <div style={{marginTop:'5px'}}>
-                                        <Button
-                                            variant="outlined"
-                                            color="primary"
-                                            className={classes.subscribeButton}
-                                            startIcon={<RepeatIcon style={{fontSize:'12px'}}/>}
-                                        >
-                                            SUBSCRIBE
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div style={{display: 'flex', marginBottom: '20px', justifyContent:'space-between'}}>
-                                <div>
-                                    <img style={{width:'65px', height: '65px'}}src={category_milk_full_cream_gokul_500ml} alt='Gokul - Full Cream Milk 500 ml'/>
-                                </div>
-                                <div style={{marginLeft: '10px', marginRight: '10px'}}>
-                                    <div style={{fontSize: '12px'}}>Gokul-Full Cream Milk (500 ml)</div>
-                                    <div style={{fontSize: '11px', color:'grey', marginTop: '5px', marginBottom: '5px'}}>1 Pkt</div>
-                                    <div style={{fontSize: '12px'}}>&#8377; 29.00</div>
-                                </div>
-                                <div style={{textAlign:'right'}}>
-                                    <div style={{marginBottom:'5px'}}>
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            className={classes.addButton}
-                                            startIcon={<AddIcon fontSize="small"/>}
-                                            onClick={() => setState(true)}
-                                        >
-                                            ADD
-                                        </Button>
-                                    </div>
-                                    <div style={{marginTop:'5px'}}>
-                                        <Button
-                                            variant="outlined"
-                                            color="primary"
-                                            className={classes.subscribeButton}
-                                            startIcon={<RepeatIcon style={{fontSize:'12px'}}/>}
-                                        >
-                                            SUBSCRIBE
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                        </AccordionDetails>
-                    </Accordion>
+                                    </AccordionSummary>
+                                    <AccordionDetails style={{flexDirection:'column'}}>
+                                        {SubCategory.subCategoryItems.map((subCategoryItem, index) => {
+                                            return <div key={index} style={{display: 'flex', marginBottom: '20px', justifyContent:'space-between'}}>
+                                                        <div>
+                                                            <img style={{width:'65px', height: '65px'}} src={require(`../../media/${subCategoryItem.imgUrl}`)} alt='Amul Gold Milk 500 ml'/>
+                                                        </div>
+                                                        <div style={{marginLeft: '10px', marginRight: '10px'}}>
+                                                            <div style={{fontSize: '12px'}}>{subCategoryItem.item}</div>
+                                                            <div style={{fontSize: '11px', color:'grey', marginTop: '5px', marginBottom: '5px'}}>1 Pkt</div>
+                                                            <div style={{fontSize: '12px'}}>&#8377; {subCategoryItem.price}</div>
+                                                        </div>
+                                                        <div style={{textAlign:'right'}}>
+                                                            {checkItemCount(subCategoryItem.subCategoryId) > 0 ? (
+                                                                <div style={{marginBottom:'5px', float:'right',border:'1px solid', borderRadius:'25px',color:'#00c4b4'}}>
+                                                                    <div style={{display:'flex', paddingTop:'2px'}}>
+                                                                        <div style={{padding: '2px 5px 2px 5px'}} onClick={() => decrementCartItem(subCategoryItem.subCategoryId, subCategoryItem.price)}><RemoveIcon style={{fontSize:'15px'}}/></div>
+                                                                        <div style={{fontSize:'12px',padding: '2px 5px 2px 5px', color:'#000'}}>{checkItemCount(subCategoryItem.subCategoryId)}</div>
+                                                                        <div style={{padding: '2px 5px 2px 5px'}} onClick={() => incrementCartItem(subCategoryItem.subCategoryId, subCategoryItem.price)}><AddIcon style={{fontSize:'15px'}}/></div>
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <div style={{marginBottom:'5px'}}>
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        color="primary"
+                                                                        className={classes.addButton}
+                                                                        startIcon={<AddIcon fontSize="small"/>}
+                                                                        onClick={() => handleAdd(subCategoryItem.subCategoryId, subCategoryItem.price)}
+                                                                    >
+                                                                        ADD
+                                                                    </Button>
+                                                                </div>
+                                                            )}
+                                                            <div style={{marginTop:'5px'}}>
+                                                                <Button
+                                                                    variant="outlined"
+                                                                    color="primary"
+                                                                    className={classes.subscribeButton}
+                                                                    startIcon={<RepeatIcon style={{fontSize:'12px'}}/>}
+                                                                >
+                                                                    SUBSCRIBE
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                        })}
+                                    </AccordionDetails>
+                               </Accordion>
+                    })}
                 </div>
             </div>
             <Snackbar
                 anchorOrigin={{ vertical:'bottom', horizontal:'center' }}
                 open={openSnackBar}
-                onClose={handleCloseSnackBar}
             >
                 <SnackbarContent style={{backgroundColor:'#00c4b4'}}
                     message={snackBarContent}
                     action={
                         <React.Fragment>
-                            <IconButton size="small" aria-label="close" color="inherit" onClick={handleCloseSnackBar}>
-                            Proceed to cart <ArrowForwardIosIcon fontSize="small" />
+                            <IconButton size="small" aria-label="close" color="inherit">
+                                <span onClick={()=>gotToCart(totalCartItemsArr)}>Proceed to cart <ArrowForwardIosIcon fontSize="small" /></span>
                             </IconButton>
                         </React.Fragment>
                         }

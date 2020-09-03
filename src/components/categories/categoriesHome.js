@@ -9,6 +9,7 @@ import { grey } from '@material-ui/core/colors';
 import InputBase from '@material-ui/core/InputBase';
 import SearchIcon from '@material-ui/icons/Search';
 import Categories from '../categories/categories';
+import * as categoriesData from '../common/data'
 
 const useStyles = makeStyles((theme) => ({
     appBar: {
@@ -28,6 +29,15 @@ export default function CategoriesHome() {
         history.push(path);
     }
 
+    const [categories, updateCategories] = React.useState(categoriesData.categories);
+
+    const searchCategories = (e) => {
+        let filteredCategories = categoriesData.categories.filter((category)=>{
+          return category.category.toLowerCase().includes(e.target.value.toLowerCase());
+        })
+        updateCategories([...filteredCategories]);
+    }
+
     return (
         <div>
             <AppBar className={classes.appBar}>
@@ -39,6 +49,7 @@ export default function CategoriesHome() {
                 className={classes.input}
                 placeholder="Fruits, Vegetables & more"
                 inputProps={{ 'aria-label': 'fruits, vegetables & more' }}
+                onChange={searchCategories}
               />
               <IconButton type="submit" className={classes.iconButton} aria-label="search">
                 <SearchIcon />
@@ -46,7 +57,7 @@ export default function CategoriesHome() {
             </Toolbar>
             </AppBar>
             <div style={{padding: '24px'}}>
-              <Categories />
+              <Categories categories={categories}/>
             </div>
         </div>
     );
