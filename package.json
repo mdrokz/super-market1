@@ -12,7 +12,7 @@
     "@testing-library/user-event": "^7.1.2",
     "date-fns": "^2.15.0",
     "json2mq": "^0.2.0",
-    "moment": "^2.27.0",
+    "moment": "^2.29.4",
     "moment-timezone": "^0.5.31",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
